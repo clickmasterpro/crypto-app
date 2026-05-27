@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M54,18 A36,36 0 1,1 53.99,18 Z"
+        android:fillColor="#F59E0B" />
+    <path
+        android:pathData="M54,23 A31,31 0 1,1 53.99,23 Z"
+        android:fillColor="#D97706" />
+    <path
+        android:pathData="M54,26 A28,28 0 1,1 53.99,26 Z"
+        android:fillColor="#FBBF24" />
+    <!-- Letter K of Kryptos -->
+    <path
+        android:pathData="M43,38 L49,38 L49,70 L43,70 Z"
+        android:fillColor="#151922" />
+    <path
+        android:pathData="M49,52 L60,38 L68,38 L55,52 L68,70 L60,70 Z"
+        android:fillColor="#151922" />
+</vector>
