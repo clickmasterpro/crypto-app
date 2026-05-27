@@ -1,6 +1,7 @@
 package com.example.ui.cryptodetail
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -268,14 +269,7 @@ fun InteractivePriceChart(
 ) {
     when (chartUiState) {
         is ChartUiState.Loading -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(220.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-            }
+            LoadingChartWaveAnimation()
         }
         is ChartUiState.Error -> {
             Box(
@@ -320,6 +314,16 @@ fun ChartViewCanvas(
     val maxPrice = prices.maxOrNull() ?: 1.0
     val minPrice = prices.minOrNull() ?: 0.0
     val priceRange = if (maxPrice - minPrice == 0.0) 1.0 else maxPrice - minPrice
+
+    // Dynamic animatable progress state triggered whenever list points change!
+    val animationProgress = remember { Animatable(0f) }
+    LaunchedEffect(key1 = points) {
+        animationProgress.snapTo(0f)
+        animationProgress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(750, easing = FastOutSlowInEasing)
+        )
+    }
 
     // Touch gesture dragging state indicators
     var activeIdx by remember { mutableStateOf<Int?>(null) }
@@ -433,11 +437,12 @@ fun ChartViewCanvas(
                 )
             }
 
-            // Generate Path Points
+            // Generate Path Points (animated interpolations of Y position upwards)
             val pointsOffset = points.mapIndexed { idx, pt ->
                 val x = unitCellWidth * idx
-                val y = height - (((pt.price - minPrice) / priceRange) * height).toFloat()
-                Offset(x, y)
+                val finalY = height - (((pt.price - minPrice) / priceRange) * height).toFloat()
+                val animatedY = height - (height - finalY) * animationProgress.value
+                Offset(x, animatedY)
             }
 
             // Path construction
@@ -653,5 +658,84 @@ fun StatMetricRow(
             color = valueColor,
             fontFamily = FontFamily.Monospace
         )
+    }
+}
+
+@Composable
+fun LoadingChartWaveAnimation() {
+    val infiniteTransition = rememberInfiniteTransition(label = "chart_pulse")
+    val phase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 2f * Math.PI.toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "phase"
+    )
+
+    val color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(220.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        // Draw custom pulsing / sliding wave canvas representation
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val width = size.width
+            val height = size.height
+            val pointsCount = 40
+            val unitWidth = width / (pointsCount - 1)
+            val path = Path()
+
+            val mainY = height * 0.5f
+
+            path.moveTo(0f, mainY)
+            for (i in 0 until pointsCount) {
+                val x = unitWidth * i
+                // Amplitude oscillates with phase shift
+                val amplitude = height * 0.22f * kotlin.math.sin(phase)
+                val relativeWave = kotlin.math.sin((i.toFloat() / pointsCount) * 3f * Math.PI.toFloat() + phase)
+                val y = mainY + amplitude * relativeWave.toFloat()
+                path.lineTo(x, y)
+            }
+
+            drawPath(
+                path = path,
+                color = color,
+                style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
+            )
+
+            // Draw a subtle translucent gradient under it
+            val fillPath = Path().apply {
+                addPath(path)
+                lineTo(width, height)
+                lineTo(0f, height)
+                close()
+            }
+            drawPath(
+                path = fillPath,
+                brush = Brush.verticalGradient(
+                    colors = listOf(color.copy(alpha = 0.25f), Color.Transparent)
+                )
+            )
+        }
+
+        // Keep a circular loading indicator on top to be super direct and clear!
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.85f)),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                strokeWidth = 2.5.dp,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
     }
 }

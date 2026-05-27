@@ -8,13 +8,13 @@ import androidx.compose.animation.*
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.StarBorder
-import androidx.compose.material.icons.outlined.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -117,7 +117,7 @@ class MainActivity : ComponentActivity() {
                                     },
                                     icon = {
                                         Icon(
-                                            imageVector = if (currentRoute == "market") Icons.Default.TrendingUp else Icons.Outlined.TrendingUp,
+                                            imageVector = if (currentRoute == "market") Icons.AutoMirrored.Filled.TrendingUp else Icons.AutoMirrored.Outlined.TrendingUp,
                                             contentDescription = "Markets navigation trigger"
                                         )
                                     },
